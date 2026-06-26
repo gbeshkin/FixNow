@@ -11,9 +11,18 @@ export async function GET() {
     });
   }
 
-  const state = await loadDatabaseState();
-  return NextResponse.json({
-    source: "database",
-    state
-  });
+  try {
+    const state = await loadDatabaseState();
+    return NextResponse.json({
+      source: "database",
+      state
+    });
+  } catch (error) {
+    console.error("Failed to load database state", error);
+    return NextResponse.json({
+      source: "mock",
+      state: initialState,
+      databaseError: "Database is not ready. Run npm run db:setup with Railway DATABASE_URL."
+    });
+  }
 }

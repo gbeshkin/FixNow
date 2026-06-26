@@ -37,8 +37,8 @@ export async function createSharedTask(input: CreateTaskInput) {
     });
 
     if (!response.ok) return localTask;
-    const data = (await response.json()) as { task: TaskRequest };
-    return data.task;
+    const data = (await response.json()) as { task?: TaskRequest };
+    return data.task ?? localTask;
   } catch {
     return localTask;
   }
