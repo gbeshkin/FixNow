@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Hammer, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { clearSession, getSession, type MockSession } from "@/lib/auth";
-import { loadState } from "@/lib/store";
+import { loadSharedState } from "@/lib/api-client";
 
 export function Header() {
   const [session, setSession] = useState<MockSession | null>(null);
@@ -14,8 +14,9 @@ export function Header() {
     const currentSession = getSession();
     setSession(currentSession);
     if (currentSession?.role === "customer") {
-      const state = loadState();
-      setPendingCounterOffers(state.tasks.filter((task) => task.customerId === currentSession.profileId && task.negotiationStatus === "handyman_counter").length);
+      loadSharedState().then((state) => {
+        setPendingCounterOffers(state.tasks.filter((task) => task.customerId === currentSession.profileId && task.negotiationStatus === "handyman_counter").length);
+      });
     }
   }, []);
 

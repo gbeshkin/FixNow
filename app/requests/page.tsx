@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { StatusBadge } from "@/components/Badge";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { loadSharedState } from "@/lib/api-client";
 import { findMatchingHandymen } from "@/lib/matching";
 import { eur } from "@/lib/pricing";
 import { loadState, updateNegotiationStatus } from "@/lib/store";
@@ -22,6 +23,10 @@ export default function RequestsPage() {
 function RequestsExperience({ session }: { session: { role: string; profileId?: string } }) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [state, setState] = useState<AppState>(() => loadState());
+
+  useEffect(() => {
+    loadSharedState().then(setState);
+  }, []);
   const handyman = session.role === "handyman" ? state.handymen.find((item) => item.id === session.profileId) : undefined;
   const tasks = [...state.tasks]
     .filter((task) => {

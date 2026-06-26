@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AvailabilityBadge, StatusBadge } from "@/components/Badge";
 import { PriceSummary } from "@/components/PriceSummary";
+import { loadSharedState } from "@/lib/api-client";
 import { findMatchingHandymen } from "@/lib/matching";
 import { calculateTaskPrice, eur } from "@/lib/pricing";
 import { loadState, proposeTaskPrice, updateTaskStatus } from "@/lib/store";
@@ -32,6 +33,23 @@ function HandymanDashboard({ session }: { session: { profileId?: string } }) {
       return findMatchingHandymen(task, [selectedHandyman]).length > 0;
     });
   }, [canReceiveTasks, selectedHandyman, state.tasks]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refreshState() {
+      const nextState = await loadSharedState();
+      if (!cancelled) setState(nextState);
+    }
+
+    refreshState();
+    const interval = window.setInterval(refreshState, 5000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   function changeStatus(taskId: string, status: "assigned" | "in_progress" | "completed") {
     if (!selectedHandyman) return;

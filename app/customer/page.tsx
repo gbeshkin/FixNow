@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { MapPin, MessageCircle, Send, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
@@ -10,7 +10,8 @@ import { StatusBadge } from "@/components/Badge";
 import { geocodeAddress, geocodeTallinnAddress } from "@/lib/geocoding";
 import { distanceKm, findMatchingHandymen } from "@/lib/matching";
 import { eur } from "@/lib/pricing";
-import { createTask, loadState, updateNegotiationStatus } from "@/lib/store";
+import { createSharedTask, loadSharedState } from "@/lib/api-client";
+import { loadState, updateNegotiationStatus } from "@/lib/store";
 import { taskCategories, type Coordinates, type PreferredTime, type TaskCategory, type TaskRequest } from "@/lib/types";
 
 const tallinnCenter: Coordinates = { lat: 59.437, lng: 24.7536 };
@@ -37,7 +38,7 @@ export default function CustomerPage() {
 }
 
 function CustomerExperience({ session }: { session: { label: string; profileId?: string } }) {
-  const state = useMemo(() => loadState(), []);
+  const [state, setState] = useState(() => loadState());
   const [location, setLocation] = useState<Coordinates>(tallinnCenter);
   const [address, setAddress] = useState("Tartu mnt 18, Tallinn");
   const [addressMatch, setAddressMatch] = useState("Kesklinn");
@@ -50,6 +51,10 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
     { from: "support", text: "Hi! We can help if matching or price negotiation gets stuck." }
   ]);
   const customer = state.customers.find((item) => item.id === session.profileId) ?? state.customers[0];
+
+  useEffect(() => {
+    loadSharedState().then(setState);
+  }, []);
 
   const previewTask: TaskRequest = {
     id: "preview",
@@ -141,9 +146,9 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
     };
   }, [address]);
 
-  function submit(formData: FormData) {
+  async function submit(formData: FormData) {
     const photos = formData.getAll("photos").filter((file): file is File => file instanceof File && file.name.length > 0);
-    const task = createTask({
+    const task = await createSharedTask({
       customerId: customer?.id,
       customerName: customer?.name ?? session.label,
       phone: customer?.phone ?? "",
@@ -160,6 +165,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
       preferredDateTime: preferredTime === "Scheduled" ? String(formData.get("preferredDateTime")) : undefined
     });
     setSubmittedTask(task);
+    setState(await loadSharedState());
   }
 
   function setNegotiationStatus(status: TaskRequest["negotiationStatus"]) {
