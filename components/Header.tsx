@@ -28,9 +28,11 @@ export function Header() {
           <span className="text-base sm:text-xl">HandyGo</span>
         </Link>
         <nav className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-0.5 overflow-x-auto whitespace-nowrap text-xs font-medium text-slate-700 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-1 sm:text-sm [&::-webkit-scrollbar]:hidden">
-          <Link className="rounded-md px-1.5 py-2 hover:bg-slate-100 sm:px-3" href="/requests">
-            Requests
-          </Link>
+          {session && (
+            <Link className="rounded-md px-1.5 py-2 hover:bg-slate-100 sm:px-3" href="/requests">
+              Requests
+            </Link>
+          )}
           {!session && (
             <>
               <Link className="rounded-md px-1.5 py-2 hover:bg-slate-100 sm:px-3" href="/register">
