@@ -12,7 +12,7 @@ const tallinnLocations: Array<{ keywords: string[]; coordinates: Coordinates; la
   { keywords: ["mustamae", "mustamäe", "akadeemia", "sõpruse", "sopruse", "tammsaare", "eduvard vilde", "vilde tee"], coordinates: { lat: 59.4079, lng: 24.6807 }, label: "Mustamae" },
   { keywords: ["pohja tallinn", "pohja-tallinn", "põhja tallinn", "põhja-tallinn", "telliskivi", "kopli", "kalamaja", "pelgulinn", "stroomi"], coordinates: { lat: 59.4503, lng: 24.7062 }, label: "Pohja-Tallinn" },
   { keywords: ["nomme", "nõmme", "vabaduse pst", "rahumae", "rahumäe", "paaskula", "pääsküla", "hiiu"], coordinates: { lat: 59.3876, lng: 24.6869 }, label: "Nomme" },
-  { keywords: ["haabersti", "rocca", "oismäe", "oismae", "väike-õismäe", "vaike oismae", "paldiski mnt"], coordinates: { lat: 59.4269, lng: 24.6464 }, label: "Haabersti" },
+  { keywords: ["haabersti", "rocca", "oismäe", "oismae", "väike-õismäe", "vaike oismae", "paldiski mnt", "tiskre", "tiskrevalja", "tiskrevälja", "tiskrevlja"], coordinates: { lat: 59.4269, lng: 24.6464 }, label: "Haabersti" },
   { keywords: ["pirita", "merivälja", "merivalja", "kloostrimetsa", "maarjamäe", "maarjamae"], coordinates: { lat: 59.4663, lng: 24.8357 }, label: "Pirita" },
   { keywords: ["kristiine", "lillekula", "lilleküla", "kotka", "tedre", "tulika"], coordinates: { lat: 59.4232, lng: 24.7104 }, label: "Kristiine" }
 ];

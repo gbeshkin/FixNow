@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { MapPin, MessageCircle, Send, SlidersHorizontal } from "lucide-react";
 import { Header } from "@/components/Header";
 import { MapPicker } from "@/components/MapPicker";
@@ -104,6 +104,12 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
     setSubmittedTask(null);
   }
 
+  function submitAddressSearch(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    event.currentTarget.blur();
+  }
+
   useEffect(() => {
     const localMatch = geocodeTallinnAddress(address);
     if (localMatch || address.trim().length < 4) return;
@@ -179,7 +185,9 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
             <input
               value={address}
               onChange={(event) => updateAddress(event.target.value)}
-              className="min-w-0 flex-1 truncate bg-transparent text-sm font-semibold text-ink outline-none"
+              onKeyDown={submitAddressSearch}
+              enterKeyHint="search"
+              className="min-w-0 flex-1 truncate bg-transparent text-base font-semibold text-ink outline-none sm:text-sm"
               aria-label="Delivery address"
             />
           </label>
@@ -226,6 +234,8 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
                   <input
                     value={address}
                     onChange={(event) => updateAddress(event.target.value)}
+                    onKeyDown={submitAddressSearch}
+                    enterKeyHint="search"
                     className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink outline-none"
                     aria-label="Delivery address"
                   />
