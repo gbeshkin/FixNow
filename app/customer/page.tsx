@@ -219,7 +219,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-sea">HandyGo</p>
-                <h1 className="mt-1 text-3xl font-bold text-ink">What do you need help with?</h1>
+                <h1 className="mt-1 text-2xl font-bold leading-tight text-ink sm:text-3xl">What do you need help with?</h1>
                 <p className="mt-2 text-sm text-slate-600">Logged in as {customer?.name ?? session.label}. Choose address and service, then request help.</p>
                 <div className="mt-4 hidden max-w-xl items-center gap-2 rounded-full bg-slate-100 px-4 py-3 lg:flex">
                   <MapPin size={18} className="text-sea" />
