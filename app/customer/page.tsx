@@ -286,7 +286,10 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
               </label>
               {addressLookupStatus === "loading" && <p className="rounded-lg bg-sky-50 p-3 text-sm text-sky-900">Looking up this address and updating nearby masters...</p>}
               {addressLookupStatus === "pin" && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">Using the map pin as the exact task location.</p>}
-              <MapPicker value={location} onChange={updateLocationFromMap} label="Task location" nearbyMarkers={mapMarkers} />
+              <div className="hidden lg:block">
+                <MapPicker value={location} onChange={updateLocationFromMap} label="Task location" nearbyMarkers={mapMarkers} />
+              </div>
+              <MobileMasterPicker masters={possibleMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
 
               <label className="grid gap-2 text-sm font-semibold text-slate-800">
                 Service
@@ -448,6 +451,58 @@ function SupportChat({
           <Send size={16} />
         </button>
       </form>
+    </section>
+  );
+}
+
+function MobileMasterPicker({
+  masters,
+  selectedMasterId,
+  onSelect
+}: {
+  masters: ReturnType<typeof findMatchingHandymen>;
+  selectedMasterId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <section className="lg:hidden">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-sm font-bold text-slate-800">Choose a master group</p>
+        <span className="text-xs font-semibold text-slate-500">{masters.length} nearby</span>
+      </div>
+      {masters.length > 0 ? (
+        <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {masters.slice(0, 8).map((match, index) => {
+            const selected = selectedMasterId === match.handyman.id;
+            const minutes = etaMinutes(match.distanceKm);
+
+            return (
+              <button
+                key={match.handyman.id}
+                type="button"
+                onClick={() => onSelect(match.handyman.id)}
+                className={`min-w-44 rounded-lg border bg-white p-3 text-left transition ${
+                  selected ? "border-sea bg-mint/40 ring-2 ring-teal-100" : "border-slate-200"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-ink">Master #{index + 1}</span>
+                  <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">{match.handyman.rating.toFixed(1)}</span>
+                </div>
+                <p className="mt-3 font-bold text-ink">Anonymous master</p>
+                <p className="mt-1 text-sm text-slate-600">{match.handyman.cityDistrict}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                  <span>{minutes}-{minutes + 10} min</span>
+                  <span>{match.distanceKm.toFixed(1)} km</span>
+                  <span>{match.handyman.completedJobs} jobs</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">No masters nearby for this service yet. Try another category or address.</p>
+      )}
     </section>
   );
 }
