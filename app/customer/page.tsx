@@ -213,14 +213,14 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
         </section>
       )}
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <section className="min-w-0 space-y-6">
+      <div className="mx-auto grid max-w-7xl gap-5 px-3 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:gap-6">
+        <section className="min-w-0 space-y-5 lg:col-start-1">
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-sea">HandyGo</p>
-                <h1 className="mt-1 text-2xl font-bold leading-tight text-ink sm:text-3xl">What do you need help with?</h1>
-                <p className="mt-2 text-sm text-slate-600">Logged in as {customer?.name ?? session.label}. Choose address and service, then request help.</p>
+                <h1 className="mt-1 text-2xl font-bold leading-tight text-ink sm:text-3xl">Choose a service nearby</h1>
+                <p className="mt-2 text-sm text-slate-600">Logged in as {customer?.name ?? session.label}. Pick a service, set your offer, and HandyGo starts matching.</p>
                 <div className="mt-4 hidden max-w-xl items-center gap-2 rounded-full bg-slate-100 px-4 py-3 lg:flex">
                   <MapPin size={18} className="text-sea" />
                   <input
@@ -231,8 +231,19 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
                   />
                 </div>
               </div>
-              <div className="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                You set the offer. Masters can accept it or send a justified counter-offer.
+              <div className="grid grid-cols-3 gap-2 rounded-lg bg-slate-50 p-2 text-center text-xs text-slate-600 sm:min-w-72">
+                <div className="rounded-md bg-white px-2 py-3">
+                  <p className="font-bold text-ink">{possibleMasters.length}</p>
+                  <p>nearby</p>
+                </div>
+                <div className="rounded-md bg-white px-2 py-3">
+                  <p className="font-bold text-ink">{fastestMasters[0] ? `${etaMinutes(fastestMasters[0].distanceKm)}m` : "-"}</p>
+                  <p>fastest</p>
+                </div>
+                <div className="rounded-md bg-white px-2 py-3">
+                  <p className="font-bold text-ink">Offer</p>
+                  <p>your price</p>
+                </div>
               </div>
             </div>
           </div>
@@ -242,7 +253,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
               <h2 className="text-xl font-bold text-ink">Discovery</h2>
               <span className="text-sm text-slate-500">{addressLookupStatus === "loading" ? "Looking up address..." : `${possibleMasters.length} available nearby${addressMatch && addressMatch !== "Map pin" && addressMatch !== "Looking up address" ? ` in ${addressMatch}` : ""}`}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-5 [&::-webkit-scrollbar]:hidden">
               {taskCategories.map((item) => (
                 <button
                   key={item}
@@ -252,7 +263,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
                     setSelectedMasterId(null);
                     setSubmittedTask(null);
                   }}
-                  className={`min-h-24 rounded-lg border p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${
+                  className={`min-h-24 min-w-40 rounded-lg border p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm sm:min-w-0 ${
                     category === item ? "border-sea ring-2 ring-teal-100" : "border-slate-200"
                   } ${categoryTone[item]}`}
                 >
@@ -262,32 +273,11 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
               ))}
             </div>
           </section>
-
-          <MasterShelf title="Recommended for you" masters={recommendedMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
-          <MasterShelf title="Fastest arrival" masters={fastestMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
-          <MasterShelf title="Top rated" masters={topRatedMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
-
-          {submittedTask && (
-            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-xl font-bold text-ink">Search process</h2>
-                <StatusBadge status={submittedTask.status} />
-              </div>
-              <p className="mt-2 text-sm text-slate-600">Request created. These anonymous masters can receive and accept the task.</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {submittedMatches.length > 0 ? (
-                  submittedMatches.map((match, index) => <MasterCard key={match.handyman.id} index={index} match={match} selected={false} onSelect={() => undefined} compact />)
-                ) : (
-                  <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">No available masters match this service and location yet.</p>
-                )}
-              </div>
-            </section>
-          )}
         </section>
 
-        <aside className="lg:sticky lg:top-20 lg:self-start">
+        <aside className="min-w-0 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:self-start">
           <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
-            <h2 className="text-xl font-bold text-ink">{submittedTask ? "Search process" : "Your request"}</h2>
+            <h2 className="text-xl font-bold text-ink">{submittedTask ? "Search process" : "Request this service"}</h2>
             {!submittedTask ? (
             <form action={submit} className="mt-4 grid gap-4">
               <label className="grid gap-2 text-sm font-semibold text-slate-800">
@@ -403,6 +393,30 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
 
           <SupportChat messages={supportMessages} onSend={sendSupportMessage} />
         </aside>
+
+        <section className="min-w-0 space-y-5 lg:col-start-1">
+
+          <MasterShelf title="Recommended for you" masters={recommendedMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
+          <MasterShelf title="Fastest arrival" masters={fastestMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
+          <MasterShelf title="Top rated" masters={topRatedMasters} selectedMasterId={selectedMasterId} onSelect={setSelectedMasterId} />
+
+          {submittedTask && (
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-bold text-ink">Search process</h2>
+                <StatusBadge status={submittedTask.status} />
+              </div>
+              <p className="mt-2 text-sm text-slate-600">Request created. These anonymous masters can receive and accept the task.</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {submittedMatches.length > 0 ? (
+                  submittedMatches.map((match, index) => <MasterCard key={match.handyman.id} index={index} match={match} selected={false} onSelect={() => undefined} compact />)
+                ) : (
+                  <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">No available masters match this service and location yet.</p>
+                )}
+              </div>
+            </section>
+          )}
+        </section>
       </div>
     </main>
   );

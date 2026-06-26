@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           crossOrigin=""
         />
       </head>
-      <body className="min-h-screen font-sans antialiased">{children}</body>
+      <body className="min-h-screen overflow-x-hidden font-sans antialiased">{children}</body>
     </html>
   );
 }
