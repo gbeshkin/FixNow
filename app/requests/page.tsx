@@ -4,30 +4,58 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { StatusBadge } from "@/components/Badge";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { findMatchingHandymen } from "@/lib/matching";
 import { eur } from "@/lib/pricing";
 import { loadState } from "@/lib/store";
 import type { TaskRequest } from "@/lib/types";
 
 export default function RequestsPage() {
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const state = useMemo(() => loadState(), []);
-  const tasks = [...state.tasks].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-  const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? tasks[0];
-
   return (
     <>
       <Header />
-      <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
+      <ProtectedRoute>{(session) => <RequestsExperience session={session} />}</ProtectedRoute>
+    </>
+  );
+}
+
+function RequestsExperience({ session }: { session: { role: string; profileId?: string } }) {
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const state = useMemo(() => loadState(), []);
+  const handyman = session.role === "handyman" ? state.handymen.find((item) => item.id === session.profileId) : undefined;
+  const tasks = [...state.tasks]
+    .filter((task) => {
+      if (session.role === "admin") return true;
+      if (session.role === "customer") return task.customerId === session.profileId;
+      if (session.role === "handyman" && handyman) {
+        return task.assignedHandymanId === handyman.id || (task.status === "searching" && findMatchingHandymen(task, [handyman]).length > 0);
+      }
+      return false;
+    })
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? tasks[0];
+  const title = session.role === "admin" ? "All requests" : session.role === "handyman" ? "Available requests" : "My requests";
+  const subtitle =
+    session.role === "admin"
+      ? "Admin can review every saved request in this MVP."
+      : session.role === "handyman"
+        ? "Only assigned requests and open matching requests are shown."
+        : "Only requests created by your customer profile are shown.";
+
+  return (
+    <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <section className="min-w-0">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-sea">Saved locally</p>
-              <h1 className="mt-1 text-3xl font-bold text-ink">My requests</h1>
-              <p className="mt-2 text-sm text-slate-600">Requests are saved in this browser, so you can return here after logout.</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-sea">Protected area</p>
+              <h1 className="mt-1 text-3xl font-bold text-ink">{title}</h1>
+              <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
             </div>
-            <Link href="/customer" className="rounded-lg bg-sea px-4 py-2 text-center text-sm font-semibold text-white hover:bg-teal-800">
-              New request
-            </Link>
+            {session.role === "customer" ? (
+              <Link href="/customer" className="rounded-lg bg-sea px-4 py-2 text-center text-sm font-semibold text-white hover:bg-teal-800">
+                New request
+              </Link>
+            ) : null}
           </div>
 
           {tasks.length > 0 ? (
@@ -57,7 +85,7 @@ export default function RequestsPage() {
             </div>
           ) : (
             <div className="rounded-lg border border-slate-200 bg-white p-6 text-slate-600 shadow-sm">
-              No requests saved in this browser yet.
+              No requests available for this login.
             </div>
           )}
         </section>
@@ -66,7 +94,6 @@ export default function RequestsPage() {
           {selectedTask ? <RequestDetails task={selectedTask} /> : null}
         </aside>
       </main>
-    </>
   );
 }
 
