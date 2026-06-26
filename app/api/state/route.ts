@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
 import { initialState } from "@/data/seed";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { hasDatabaseUrl } from "@/lib/db";
+import { loadDatabaseState } from "@/lib/database-store";
 
 export async function GET() {
-  try {
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({
-        source: "mock",
-        state: initialState
-      });
-    }
+  if (!hasDatabaseUrl()) {
+    return NextResponse.json({
+      source: "mock",
+      state: initialState
+    });
+  }
 
-    const { loadDatabaseState } = await import("@/lib/database-store");
+  try {
     const state = await loadDatabaseState();
     return NextResponse.json({
       source: "database",

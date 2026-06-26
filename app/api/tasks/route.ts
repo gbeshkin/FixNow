@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
+import { hasDatabaseUrl } from "@/lib/db";
+import { insertDatabaseTask } from "@/lib/database-store";
 import type { TaskRequest } from "@/lib/types";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 type CreateTaskPayload = Omit<TaskRequest, "id" | "createdAt" | "status">;
 
 export async function POST(request: Request) {
-  try {
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ databaseAvailable: false, error: "DATABASE_URL is not configured" });
-    }
+  if (!hasDatabaseUrl()) {
+    return NextResponse.json({ databaseAvailable: false, error: "DATABASE_URL is not configured" });
+  }
 
+  try {
     const payload = (await request.json()) as CreateTaskPayload;
-    const { insertDatabaseTask } = await import("@/lib/database-store");
     const task = await insertDatabaseTask(payload);
     return NextResponse.json({ databaseAvailable: true, task }, { status: 201 });
   } catch (error) {
