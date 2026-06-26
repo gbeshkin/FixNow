@@ -12,6 +12,7 @@
 }
 
 html {
+  -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
 
@@ -19,6 +20,13 @@ body {
   margin: 0;
   background: #f7faf9;
   color: #14213d;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
 }
 
 .leaflet-container {

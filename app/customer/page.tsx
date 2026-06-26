@@ -172,7 +172,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
 
   return (
     <main className="bg-[#f5f8f7]">
-      <section className="sticky top-[65px] z-30 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6 lg:hidden">
+      <section className="sticky top-14 z-30 border-b border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:px-6 lg:hidden">
         <div className="mx-auto flex max-w-7xl items-center gap-3">
           <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-slate-100 px-3 py-2">
             <MapPin size={18} className="shrink-0 text-sea" />
@@ -276,13 +276,13 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
         </section>
 
         <aside className="min-w-0 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:self-start">
-          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
-            <h2 className="text-xl font-bold text-ink">{submittedTask ? "Search process" : "Request this service"}</h2>
+          <section className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-soft sm:p-5">
+            <h2 className="text-xl font-bold leading-tight text-ink sm:text-xl">{submittedTask ? "Search process" : "Request this service"}</h2>
             {!submittedTask ? (
-            <form action={submit} className="mt-4 grid gap-4">
+            <form action={submit} className="mt-4 grid gap-3 sm:gap-4">
               <label className="grid gap-2 text-sm font-semibold text-slate-800">
                 Address
-                <input value={address} onChange={(event) => updateAddress(event.target.value)} required className="rounded-lg border border-slate-300 px-3 py-2 font-normal" />
+                <input value={address} onChange={(event) => updateAddress(event.target.value)} required className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 font-normal" />
               </label>
               {addressLookupStatus === "loading" && <p className="rounded-lg bg-sky-50 p-3 text-sm text-sky-900">Looking up this address and updating nearby masters...</p>}
               {addressLookupStatus === "pin" && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">Using the map pin as the exact task location.</p>}
@@ -300,7 +300,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
                     setSelectedMasterId(null);
                     setSubmittedTask(null);
                   }}
-                  className="rounded-lg border border-slate-300 px-3 py-2 font-normal"
+                  className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 font-normal"
                 >
                   {taskCategories.map((item) => (
                     <option key={item}>{item}</option>
@@ -310,12 +310,12 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
 
               <label className="grid gap-2 text-sm font-semibold text-slate-800">
                 Task description
-                <textarea name="description" required rows={4} className="rounded-lg border border-slate-300 px-3 py-2 font-normal" />
+                <textarea name="description" required rows={4} className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 font-normal" />
               </label>
 
               <label className="grid gap-2 text-sm font-semibold text-slate-800">
                 Your offer for this service
-                <div className="flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2">
+                <div className="flex w-full min-w-0 items-center rounded-lg border border-slate-300 bg-white px-3 py-2">
                   <span className="text-sm font-semibold text-slate-500">€</span>
                   <input name="customerOffer" type="number" min={5} step={1} defaultValue={50} required className="ml-2 min-w-0 flex-1 font-normal outline-none" />
                 </div>
@@ -324,11 +324,11 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <label className="grid gap-2 text-sm font-semibold text-slate-800">
                   Photos
-                  <input name="photos" type="file" multiple accept="image/*" className="rounded-lg border border-slate-300 px-3 py-2 font-normal" />
+                  <input name="photos" type="file" multiple accept="image/*" className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 font-normal" />
                 </label>
                 <label className="grid gap-2 text-sm font-semibold text-slate-800">
                   Preferred time
-                  <select value={preferredTime} onChange={(event) => setPreferredTime(event.target.value as PreferredTime)} className="rounded-lg border border-slate-300 px-3 py-2 font-normal">
+                  <select value={preferredTime} onChange={(event) => setPreferredTime(event.target.value as PreferredTime)} className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 font-normal">
                     <option>ASAP</option>
                     <option>Today</option>
                     <option>Scheduled</option>
@@ -481,7 +481,7 @@ function MobileMasterPicker({
                 key={match.handyman.id}
                 type="button"
                 onClick={() => onSelect(match.handyman.id)}
-                className={`min-w-44 rounded-lg border bg-white p-3 text-left transition ${
+                className={`min-w-40 rounded-lg border bg-white p-3 text-left transition ${
                   selected ? "border-sea bg-mint/40 ring-2 ring-teal-100" : "border-slate-200"
                 }`}
               >
@@ -489,9 +489,9 @@ function MobileMasterPicker({
                   <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-ink">Master #{index + 1}</span>
                   <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">{match.handyman.rating.toFixed(1)}</span>
                 </div>
-                <p className="mt-3 font-bold text-ink">Anonymous master</p>
+                <p className="mt-3 text-sm font-bold text-ink">Anonymous master</p>
                 <p className="mt-1 text-sm text-slate-600">{match.handyman.cityDistrict}</p>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1 text-xs font-semibold text-slate-600">
                   <span>{minutes}-{minutes + 10} min</span>
                   <span>{match.distanceKm.toFixed(1)} km</span>
                   <span>{match.handyman.completedJobs} jobs</span>

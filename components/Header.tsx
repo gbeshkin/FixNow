@@ -20,7 +20,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-1 px-2 py-3 sm:gap-2 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 sm:h-auto sm:gap-2 sm:px-6 sm:py-3">
         <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-ink">
           <span className="hidden h-9 w-9 place-items-center rounded-lg bg-sea text-white sm:grid">
             <Hammer size={19} />
