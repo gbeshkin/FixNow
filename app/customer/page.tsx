@@ -171,15 +171,15 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
   }
 
   return (
-    <main className="bg-[#f5f8f7]">
-      <section className="sticky top-14 z-30 border-b border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:px-6 lg:hidden">
-        <div className="mx-auto flex max-w-7xl items-center gap-3">
-          <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-slate-100 px-3 py-2">
+    <main className="overflow-x-hidden bg-[#f5f8f7]">
+      <section className="relative z-30 overflow-hidden border-b border-slate-200 bg-white px-3 py-3 shadow-sm sm:px-6 lg:hidden">
+        <div className="mx-auto flex max-w-7xl min-w-0 items-center gap-3">
+          <label className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-full bg-slate-100 px-3 py-2">
             <MapPin size={18} className="shrink-0 text-sea" />
             <input
               value={address}
               onChange={(event) => updateAddress(event.target.value)}
-              className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink outline-none"
+              className="min-w-0 flex-1 truncate bg-transparent text-sm font-semibold text-ink outline-none"
               aria-label="Delivery address"
             />
           </label>
@@ -248,10 +248,14 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
             </div>
           </div>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="text-xl font-bold text-ink">Discovery</h2>
-              <span className="text-sm text-slate-500">{addressLookupStatus === "loading" ? "Looking up address..." : `${possibleMasters.length} available nearby${addressMatch && addressMatch !== "Map pin" && addressMatch !== "Looking up address" ? ` in ${addressMatch}` : ""}`}</span>
+          <section className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
+              <h2 className="shrink-0 text-xl font-bold text-ink">Discovery</h2>
+              <span className="min-w-0 truncate text-right text-sm text-slate-500">
+                {addressLookupStatus === "loading"
+                  ? "Looking up address..."
+                  : `${possibleMasters.length} available nearby${addressMatch && addressMatch !== "Map pin" && addressMatch !== "Looking up address" ? ` in ${shortLocationLabel(addressMatch)}` : ""}`}
+              </span>
             </div>
             <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-5 [&::-webkit-scrollbar]:hidden">
               {taskCategories.map((item) => (
@@ -583,6 +587,10 @@ function countHandymenForCategory(handymen: Parameters<typeof findMatchingHandym
 
 function etaMinutes(distance: number) {
   return Math.max(15, Math.round(12 + distance * 4));
+}
+
+function shortLocationLabel(label: string) {
+  return label.split(",").slice(0, 2).join(",").trim();
 }
 
 function Field({ label, name, type = "text", required = false }: { label: string; name: string; type?: string; required?: boolean }) {
