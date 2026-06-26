@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { StatusBadge } from "@/components/Badge";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { findMatchingHandymen } from "@/lib/matching";
 import { eur } from "@/lib/pricing";
-import { loadState } from "@/lib/store";
-import type { TaskRequest } from "@/lib/types";
+import { loadState, updateNegotiationStatus } from "@/lib/store";
+import type { AppState, TaskRequest } from "@/lib/types";
 
 export default function RequestsPage() {
   return (
@@ -21,7 +21,7 @@ export default function RequestsPage() {
 
 function RequestsExperience({ session }: { session: { role: string; profileId?: string } }) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const state = useMemo(() => loadState(), []);
+  const [state, setState] = useState<AppState>(() => loadState());
   const handyman = session.role === "handyman" ? state.handymen.find((item) => item.id === session.profileId) : undefined;
   const tasks = [...state.tasks]
     .filter((task) => {
@@ -34,6 +34,7 @@ function RequestsExperience({ session }: { session: { role: string; profileId?: 
     })
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? tasks[0];
+  const pendingCounterOffers = session.role === "customer" ? tasks.filter((task) => task.negotiationStatus === "handyman_counter") : [];
   const title = session.role === "admin" ? "All requests" : session.role === "handyman" ? "Available requests" : "My requests";
   const subtitle =
     session.role === "admin"
@@ -45,6 +46,15 @@ function RequestsExperience({ session }: { session: { role: string; profileId?: 
   return (
     <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <section className="min-w-0">
+          {pendingCounterOffers.length > 0 && (
+            <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 shadow-sm">
+              <p className="font-bold">You have a new counter-offer</p>
+              <p className="mt-1">
+                A master requested a different price for {pendingCounterOffers[0].category}. Open the request details and accept or decline it.
+              </p>
+            </div>
+          )}
+
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-sea">Protected area</p>
@@ -91,13 +101,29 @@ function RequestsExperience({ session }: { session: { role: string; profileId?: 
         </section>
 
         <aside className="lg:sticky lg:top-20 lg:self-start">
-          {selectedTask ? <RequestDetails task={selectedTask} /> : null}
+          {selectedTask ? (
+            <RequestDetails
+              task={selectedTask}
+              canRespondToCounterOffer={session.role === "customer" && selectedTask.negotiationStatus === "handyman_counter"}
+              onRespond={(status) => {
+                setState(updateNegotiationStatus(selectedTask.id, status));
+              }}
+            />
+          ) : null}
         </aside>
       </main>
   );
 }
 
-function RequestDetails({ task }: { task: TaskRequest }) {
+function RequestDetails({
+  task,
+  canRespondToCounterOffer,
+  onRespond
+}: {
+  task: TaskRequest;
+  canRespondToCounterOffer: boolean;
+  onRespond: (status: "accepted" | "declined") => void;
+}) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
       <div className="flex items-center justify-between gap-3">
@@ -113,6 +139,20 @@ function RequestDetails({ task }: { task: TaskRequest }) {
         {task.handymanCounterReason ? <Detail label="Reason" value={task.handymanCounterReason} /> : null}
         <Detail label="Negotiation" value={task.negotiationStatus.replace("_", " ")} />
       </dl>
+      {canRespondToCounterOffer && task.handymanCounterOffer ? (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <p className="text-sm font-semibold text-amber-950">Master asks for {eur(task.handymanCounterOffer)}</p>
+          <p className="mt-1 text-sm text-amber-900">{task.handymanCounterReason}</p>
+          <div className="mt-3 flex gap-2">
+            <button onClick={() => onRespond("accepted")} className="flex-1 rounded-lg bg-sea px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800" type="button">
+              Accept offer
+            </button>
+            <button onClick={() => onRespond("declined")} className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-ink hover:bg-slate-50" type="button">
+              Decline
+            </button>
+          </div>
+        </div>
+      ) : null}
       <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">{task.description}</p>
     </section>
   );

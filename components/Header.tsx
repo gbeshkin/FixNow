@@ -4,12 +4,19 @@ import Link from "next/link";
 import { Hammer, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { clearSession, getSession, type MockSession } from "@/lib/auth";
+import { loadState } from "@/lib/store";
 
 export function Header() {
   const [session, setSession] = useState<MockSession | null>(null);
+  const [pendingCounterOffers, setPendingCounterOffers] = useState(0);
 
   useEffect(() => {
-    setSession(getSession());
+    const currentSession = getSession();
+    setSession(currentSession);
+    if (currentSession?.role === "customer") {
+      const state = loadState();
+      setPendingCounterOffers(state.tasks.filter((task) => task.customerId === currentSession.profileId && task.negotiationStatus === "handyman_counter").length);
+    }
   }, []);
 
   function logout() {
@@ -29,8 +36,13 @@ export function Header() {
         </Link>
         <nav className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-0.5 overflow-x-auto whitespace-nowrap text-xs font-medium text-slate-700 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-1 sm:text-sm [&::-webkit-scrollbar]:hidden">
           {session && (
-            <Link className="rounded-md px-1.5 py-2 hover:bg-slate-100 sm:px-3" href="/requests">
+            <Link className="relative rounded-md px-1.5 py-2 hover:bg-slate-100 sm:px-3" href="/requests">
               Requests
+              {pendingCounterOffers > 0 && (
+                <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold leading-5 text-white">
+                  {pendingCounterOffers}
+                </span>
+              )}
             </Link>
           )}
           {!session && (

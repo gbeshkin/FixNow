@@ -141,7 +141,15 @@ export function proposeTaskPrice(taskId: string, handymanId: string, counterOffe
 
 export function updateNegotiationStatus(taskId: string, negotiationStatus: TaskRequest["negotiationStatus"]) {
   const state = loadState();
-  state.tasks = state.tasks.map((task) => (task.id === taskId ? { ...task, negotiationStatus } : task));
+  state.tasks = state.tasks.map((task) =>
+    task.id === taskId
+      ? {
+          ...task,
+          negotiationStatus,
+          status: negotiationStatus === "accepted" && task.assignedHandymanId ? "assigned" : task.status
+        }
+      : task
+  );
   saveState(state);
   return state;
 }

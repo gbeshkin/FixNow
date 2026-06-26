@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { MapPin, MessageCircle, Send, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { MapPicker } from "@/components/MapPicker";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -74,6 +75,7 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
   const fastestMasters = [...possibleMasters].sort((a, b) => etaMinutes(a.distanceKm) - etaMinutes(b.distanceKm)).slice(0, 6);
   const topRatedMasters = [...possibleMasters].sort((a, b) => b.handyman.rating - a.handyman.rating || a.distanceKm - b.distanceKm).slice(0, 6);
   const submittedMatches = submittedTask ? findMatchingHandymen(submittedTask, state.handymen) : [];
+  const pendingCounterOffers = state.tasks.filter((task) => task.customerId === customer?.id && task.negotiationStatus === "handyman_counter");
   const mapMarkers = possibleMasters.map(({ handyman }, index) => ({
     id: handyman.id,
     position: handyman.homeLocation,
@@ -217,6 +219,22 @@ function CustomerExperience({ session }: { session: { label: string; profileId?:
                 <span className="font-bold text-ink">{submittedMatches.length}</span>
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {pendingCounterOffers.length > 0 && (
+        <section className="border-b border-amber-200 bg-amber-50 px-3 py-3 sm:px-6">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 rounded-lg border border-amber-200 bg-white p-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-bold text-amber-900">New counter-offer</p>
+              <p className="text-amber-800">
+                A master sent a different price for {pendingCounterOffers[0].category}. Please accept or decline it.
+              </p>
+            </div>
+            <Link href="/requests" className="rounded-lg bg-amber-500 px-4 py-2 text-center font-semibold text-white hover:bg-amber-600">
+              Review offer
+            </Link>
           </div>
         </section>
       )}

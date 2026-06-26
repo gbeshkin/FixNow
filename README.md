@@ -7,7 +7,8 @@ HandyGo is an MVP “Bolt for handymen” web application. Customers submit smal
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
-- Supabase-ready database/auth placeholders
+- Railway Postgres-ready database scripts
+- Supabase-ready legacy SQL placeholders
 - OpenStreetMap + Leaflet map pickers
 - Stripe placeholder helper for future payments
 
@@ -20,23 +21,46 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-If Supabase keys are not configured, the app uses mock authentication and stores data in `localStorage`. Use `/login` to choose Customer, Handyman, or Admin before opening protected role areas.
+Use `/login` to choose Customer, Handyman, or Admin before opening protected role areas. Without `DATABASE_URL`, the UI still falls back to mock seed data/localStorage while the database layer is being wired into each screen.
 
 ## Environment
 
 Copy `.env.example` to `.env.local` and fill values when ready:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
+# DATABASE_SSL=false
 STRIPE_SECRET_KEY=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ```
+
+## Railway Postgres
+
+Railway Postgres exposes `DATABASE_URL` automatically when a PostgreSQL service is added to the same project. Set that value for the HandyGo service, then run:
+
+```bash
+npm run db:setup
+```
+
+This applies:
+
+- `db/schema.sql` for tables and indexes
+- `db/seed.sql` for Tallinn sample users, customers, handymen, tasks, and pricing
+
+Useful commands:
+
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+API checks:
+
+- `GET /api/state` returns `{ source: "database", state }` when `DATABASE_URL` is configured
+- `POST /api/tasks` creates a task in Postgres
 
 ## Supabase
 
-Run `supabase/schema.sql` to create tables, enums, indexes, and the matching function. Run `supabase/seed.sql` for sample Tallinn customers, handymen, tasks, and pricing settings.
+The original Supabase SQL is still available as a reference. Run `supabase/schema.sql` to create Supabase tables, enums, indexes, and the matching function. Run `supabase/seed.sql` for sample Tallinn customers, handymen, tasks, and pricing settings.
 
 Core tables:
 
