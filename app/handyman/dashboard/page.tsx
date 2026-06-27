@@ -4,10 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AvailabilityBadge, StatusBadge } from "@/components/Badge";
-import { PriceSummary } from "@/components/PriceSummary";
 import { loadSharedState } from "@/lib/api-client";
 import { findMatchingHandymen } from "@/lib/matching";
-import { calculateTaskPrice, eur } from "@/lib/pricing";
+import { calculateOfferSplit, eur } from "@/lib/pricing";
 import { loadState, proposeTaskPrice, updateTaskStatus } from "@/lib/store";
 import type { AppState } from "@/lib/types";
 
@@ -105,7 +104,7 @@ function HandymanDashboard({ session }: { session: { profileId?: string } }) {
 
         <section className="grid gap-4 lg:grid-cols-2">
           {visibleTasks.map((task) => {
-            const price = calculateTaskPrice(task.estimatedDurationHours, state.pricing);
+            const offerSplit = calculateOfferSplit(task.customerOffer, 10);
             return (
               <article key={task.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
@@ -120,7 +119,7 @@ function HandymanDashboard({ session }: { session: { profileId?: string } }) {
                   <span>Customer: {task.customerName}</span>
                   <span>Preferred: {task.preferredTime}</span>
                   <span>Customer offer: {eur(task.customerOffer)}</span>
-                  <span>Suggested payout: {eur(price.handymanPayout)}</span>
+                  <span>Handyman payout: {eur(offerSplit.handymanPayout)} (90%)</span>
                 </div>
                 {task.handymanCounterOffer && (
                   <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
@@ -154,9 +153,7 @@ function HandymanDashboard({ session }: { session: { profileId?: string } }) {
                     </button>
                   )}
                 </div>
-                <div className="mt-4">
-                  <PriceSummary compact showPayout duration={task.estimatedDurationHours} pricing={state.pricing} />
-                </div>
+                <OfferSplitSummary customerOffer={task.customerOffer} />
               </article>
             );
           })}
@@ -164,5 +161,28 @@ function HandymanDashboard({ session }: { session: { profileId?: string } }) {
 
         {visibleTasks.length === 0 && <div className="rounded-lg border border-slate-200 bg-white p-6 text-slate-600 shadow-sm">No matching open tasks for this profile right now.</div>}
       </main>
+  );
+}
+
+function OfferSplitSummary({ customerOffer }: { customerOffer: number }) {
+  const split = calculateOfferSplit(customerOffer, 10);
+
+  return (
+    <div className="mt-4 rounded-lg border border-teal-200 bg-mint/50 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-semibold text-ink">Customer offer</span>
+        <span className="text-2xl font-bold text-sea">{eur(split.customerOffer)}</span>
+      </div>
+      <div className="mt-3 grid gap-2 text-sm text-slate-700">
+        <div className="flex justify-between gap-3">
+          <span>Handyman payout</span>
+          <span className="font-semibold">{eur(split.handymanPayout)} · 90%</span>
+        </div>
+        <div className="flex justify-between gap-3">
+          <span>Company commission</span>
+          <span className="font-semibold">{eur(split.companyFee)} · {split.companyPercent}%</span>
+        </div>
+      </div>
+    </div>
   );
 }

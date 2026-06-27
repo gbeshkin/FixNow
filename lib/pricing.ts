@@ -15,6 +15,18 @@ export function calculateTaskPrice(durationHours: DurationHours, settings: Prici
   };
 }
 
+export function calculateOfferSplit(customerOffer: number, companyPercent = 10) {
+  const companyFee = Math.round(customerOffer * (companyPercent / 100) * 100) / 100;
+  const handymanPayout = Math.round((customerOffer - companyFee) * 100) / 100;
+
+  return {
+    customerOffer,
+    companyPercent,
+    companyFee,
+    handymanPayout
+  };
+}
+
 export function eur(amount: number) {
   return new Intl.NumberFormat("en-EE", {
     style: "currency",
