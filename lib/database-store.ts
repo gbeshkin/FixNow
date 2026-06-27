@@ -104,6 +104,17 @@ export async function insertDatabaseTask(input: Omit<TaskRequest, "id" | "create
   const pool = getPool();
   const id = `task-${Date.now()}`;
   const createdAt = new Date();
+  const customerId = input.customerId || `cust-${Date.now()}`;
+
+  await pool.query(
+    `insert into customer_profiles (id, name, phone, email)
+     values ($1, $2, $3, $4)
+     on conflict (id) do update set
+       name = excluded.name,
+       phone = excluded.phone,
+       email = excluded.email`,
+    [customerId, input.customerName, input.phone, input.email]
+  );
 
   await pool.query(
     `insert into tasks (
@@ -113,7 +124,7 @@ export async function insertDatabaseTask(input: Omit<TaskRequest, "id" | "create
     ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'searching', $17)`,
     [
       id,
-      input.customerId,
+      customerId,
       input.customerName,
       input.phone,
       input.email,
@@ -140,6 +151,7 @@ export async function insertDatabaseTask(input: Omit<TaskRequest, "id" | "create
   return {
     ...input,
     id,
+    customerId,
     status: "searching" as const,
     createdAt: createdAt.toISOString()
   };
